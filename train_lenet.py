@@ -21,7 +21,7 @@ data_test = MNIST('./data/mnist',
                   transform=transforms.Compose([
                       transforms.Resize((32, 32)),
                       transforms.ToTensor()]))
-data_train_loader = DataLoader(data_train, batch_size=256, shuffle=True, num_workers=8)
+data_train_loader = DataLoader(data_train, batch_size=1, shuffle=True, num_workers=8)
 data_test_loader = DataLoader(data_test, batch_size=1024, num_workers=8)
  
 
@@ -53,7 +53,7 @@ def train(epoch):
         loss_list.append(loss.detach().cpu().item())
         batch_list.append(i+1)
 
-        if i % 10 == 0:
+        if i % 1000 == 0:
             print('Train - Epoch %d, Batch: %d, Loss: %f' % (epoch, i, loss.detach().cpu().item()))
 
         loss.backward()
@@ -83,7 +83,7 @@ def train_and_test(epoch):
 def main():
     for e in range(1, 16):
         train_and_test(e)
-    torch.save(net.state_dict(), "trained_models/lenet5_1.pt")
+    torch.save(net.state_dict(), "trained_models/lenet5_2.pt")
 
 if __name__ == '__main__':
     main()

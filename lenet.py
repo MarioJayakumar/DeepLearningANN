@@ -118,6 +118,7 @@ class LeNet5(nn.Module):
 
         output = self.c3(output)
         output = output.view(img.size(0), -1)
+        output = self.f4(output)
         if standardize:
             mean = output.mean(dim=1, keepdim=True)
             std = output.std(dim=1, keepdim=True)
