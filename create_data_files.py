@@ -4,7 +4,7 @@ import glob
 import pandas as pd
 import numpy as np
 
-DATA_PATH = "./data/MoviePosters/SampleMoviePosters/SampleMoviePosters"
+DATA_PATH = "./data/MoviePosters/SampleMoviePosters/All"
 TRAIN_DATA = 'train_img'
 TEST_DATA = 'test_img'
 VAL_DATA = 'val_img'
@@ -14,7 +14,7 @@ TRAIN_LABEL_FILE = 'train_label.txt'
 TEST_LABEL_FILE = 'test_label.txt'
 
 
-path = "./data/MoviePosters/SampleMoviePosters/SampleMoviePosters"
+path = "./data/MoviePosters/SampleMoviePosters/All"
 train_glob = glob.glob(path + "/train_img/" + "*.jpg")
 test_glob = glob.glob(path + "/test_img/" + "*.jpg")
 val_glob = glob.glob(path + "/val_img/" + "*.jpg")

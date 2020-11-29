@@ -104,15 +104,16 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25):
 
                 # statistics
                 running_loss += loss.item() * inputs.size(0)
-                for sample, pred in zip(labels.data, preds.data):
-                    if torch.all(torch.eq(sample, pred)):
+                for truth, pred in zip(labels.data, preds.data):
+                    if torch.all(torch.eq(truth, pred)):
+                        #print(truth)
                         running_corrects += 1
                 #running_corrects += torch.sum(preds == labels.data)
 
             epoch_loss = running_loss / len(dataloaders[phase].dataset)
             epoch_acc = float(running_corrects) / len(dataloaders[phase].dataset)
 
-            print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
+            print('{} Loss: {:.4f} Acc: {:.4f}%'.format(phase, epoch_loss, 100*epoch_acc))
 
             # deep copy the model
             if phase == 'val' and epoch_acc > best_acc:
@@ -121,7 +122,6 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25):
             if phase == 'val':
                 val_acc_history.append(epoch_acc)
 
-        print()
 
     time_elapsed = time.time() - since
     print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
@@ -146,11 +146,13 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
     if model_name == "resnet":
         """ Resnet18
         """
-        model_ft = models.resnet18(pretrained=use_pretrained)
+        model_ft = models.resnet152(pretrained=use_pretrained)
         set_parameter_requires_grad(model_ft, feature_extract)
         num_ftrs = model_ft.fc.in_features
         model_ft.fc = nn.Sequential(
-            nn.Linear(num_ftrs, num_classes),
+            nn.Linear(num_ftrs, 1000),
+            nn.Linear(1000, 100),
+            nn.Linear(100, num_classes),
             nn.Sigmoid()
         )
         input_size = 224
@@ -226,14 +228,14 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
 model_name = "resnet"
 
 # Batch size for training
-batch_size = 64
+batch_size = 16
 
 # Number of epochs to train for
 num_epochs = 100
 
 # Flag for feature extracting. When False, we finetune the whole model,
 # when True we only update the reshaped layer params
-feature_extract = True
+feature_extract = False
 
 # Initialize the model for this run
 model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
@@ -323,6 +325,8 @@ optimizer_ft = optim.SGD(params_to_update, lr=0.001, momentum=0.9)
 criterion = nn.BCELoss()
 
 # Train and evaluate
+#model_ft, hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=10)
 model_ft, hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft, num_epochs=num_epochs)
+
 
 
