@@ -73,20 +73,58 @@ class PopularityANN(AttractorNetwork):
     def learn(self, data, labels):
         # first calculate learning threshold
         M = data.shape[0]
-        a = np.sum(data) / float((M*self.N))
         a_arr = np.zeros(shape=self.N)
+        for index in range(M):
+            self.label_map[data[index].astype(int).tobytes()] = labels[index]
+        a = 0.0
         for a_sub in range(self.N):
             a_arr_sum = 0.0
             for sub in range(M):
-                a_arr_sum += data[sub][a_sub]
-            a_arr = a_arr_sum / M
+                if data[sub][a_sub] > 0:
+                    a_arr_sum += 1
+            a_arr[a_sub] = a_arr_sum / M
+            a += a_arr[a_sub]
+        a = a / self.N
         # would like to make this matrix algebra, for now do for loops
         for i in range(self.N-1):
-            for j in range(i+1, N):
+            for j in range(i+1, self.N):
                 weight_sum = 0.0
                 for k in range(M):
-                    weight_sum += data[k][i] * (data[k][i] - a_arr[j])
+                    weight_sum += (data[k][i]) * (data[k][j] - a_arr[j])
                 self.W[i][j] = weight_sum / (self.C * a)
                 self.W[j][i] = self.W[i][j]
+
+    def simulate(self, activation, beta=1, threshold=1, max_epoch=50):
+        self.A = np.copy(activation).astype(np.float64)
+        Aold = np.copy(activation).astype(np.float64)
+        converged = False
+        epochs = 0
+        while not converged:
+            print(self.A)
+            epochs += 1
+            # generate random ordering of nodes
+            indices = np.random.permutation(self.N) 
+            presynapse = np.copy(self.A) 
+            for i in indices:                     
+                hi = 0
+                for j in range(self.N):
+                    hi += self.connections[i][j]*self.W[i][j]*presynapse[j]
+                if hi > 0:
+                    self.A[i] = 1
+                elif hi < 0:
+                    self.A[i] = -1
+            if all(self.A == Aold) or epochs > max_epoch:
+                converged = True
+            Aold = np.copy(self.A)
+        print("Converged to", self.A)
+        return (self.A, self.label_map[self.A.astype(int).tobytes()])
+    
+    def sigmoidal(self, hi, beta, threshold):
+        expo = beta*(threshold-hi)
+        sigmoid = 1 / (1 + np.exp(expo))
+        if sigmoid >= 0.5:
+            return 1
+        else:
+            return 0 
 
 
