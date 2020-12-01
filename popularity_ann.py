@@ -117,7 +117,7 @@ class PopularityANN(AttractorNetwork):
                 converged = True
             Aold = np.copy(self.A)
         print("Converged to", self.A)
-        return self.label_map[self.A.astype(int).tobytes()]
+        return (self.A, self.label_map[self.A.astype(int).tobytes()])
     
     def sigmoidal(self, hi, beta, threshold):
         expo = beta*(threshold-hi)

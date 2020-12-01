@@ -94,7 +94,7 @@ class hopnet(AttractorNetwork):
     #fileid.write("after while termination: self.A = {}, Aold = {} \n".format(self.A,Aold))
     #self.showstate(fileid,t,self.E)
     predict_label = self.label_map[self.A.tobytes()]
-    return predict_label
+    return (self.A, predict_label)
 
   def energy(self):             # Returns network's energy E 
     return -0.5 * np.dot(self.A,np.dot(self.W,self.A))
