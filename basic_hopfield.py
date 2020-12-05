@@ -46,6 +46,7 @@ class hopnet(AttractorNetwork):
     M = data.shape[0]
     for i in range(M):         
       c_data = self.discretize_activation(data[i])     # for each input pattern i
+      print(c_data)
       self.W = self.W + np.outer(c_data,c_data)
       self.label_map[c_data.tobytes()] = labels[i]
     self.W = (1.0 / N) * (self.W - M * np.eye(N,N))  # zeros main diag.

@@ -58,4 +58,26 @@ class CNN_ANN:
     def predict(self, data_input):
         inter = self.get_cnn_intermediate(data_input).reshape(self.ann.N)
         return self.ann.simulate(inter)
+
+# class that will be used when an ANN should be tested on its ownw
+class DummyCNN_ANN(CNN_ANN):
+    def __init__(self, ann:AttractorNetwork):
+        self.cnn = None
+        self.ann = ann
+
+    def learn(self, inputs, labels, verbose=False):
+        inter = []
+        for m in inputs:
+            inter_calc = m.reshape(self.ann.N)
+            inter.append(inter_calc)
+            if verbose:
+                print(inter_calc)
+        self.ann.learn(np.array(inter), labels)
+    
+    def predict(self, data_input):
+        inter = data_input.reshape(self.ann.N)
+        return self.ann.simulate(inter)
+
+    def get_cnn_intermediate(self, in_data):
+        return in_data
     
