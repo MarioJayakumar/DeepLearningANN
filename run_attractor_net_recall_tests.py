@@ -17,13 +17,27 @@ data_raw = MNIST('./data/mnist',
 
 # creating a toy dataset for simple probing
 mnist_subset = {0:[], 1:[], 2:[], 3:[], 4:[], 5:[], 6:[], 7:[], 8:[], 9:[]}
-class_size = 1
+per_class_sizes = {0:0, 1:10, 2:0, 3:0, 4:0, 5:0, 6:10, 7:0, 8:0, 9:10}
 for i in range(len(data_raw)):
     image, label = data_raw[i]
-    if len(mnist_subset[label]) < class_size:
+    if len(mnist_subset[label]) < per_class_sizes[label]:
         mnist_subset[label].append(image)
-    if all(len(k) == class_size for k in mnist_subset.values()):
+    done = True
+    for k in mnist_subset:
+        if len(mnist_subset[k]) < per_class_sizes[k]:
+            done=False
+    if done:
         break
+
+# given probes of a desired label, randomly choose an example of each label from the mnist dataset to store
+desired_stored_labels = [1]
+full_stored_set = []
+full_stored_labels = []
+for des in desired_stored_labels:
+    desired_vectors = mnist_subset[des]
+    rand_index = np.random.randint(0, len(desired_vectors))
+    full_stored_set.append(desired_vectors[rand_index].reshape(-1, 1).numpy())
+    full_stored_labels.append(des)
 
 full_pattern_set = []
 full_label_set = []
@@ -31,13 +45,11 @@ for k in mnist_subset:
     for v in mnist_subset[k]:
         full_pattern_set.append(v.reshape(-1,1).numpy())
         full_label_set.append(k)
-print(full_pattern_set)
-full_pattern_set = np.array(full_pattern_set)[:3]
+full_pattern_set = np.array(full_pattern_set)
 
-# evaluate recall on model by storing 1 subset and then recalling
-ann_model = hopnet(full_pattern_set.shape[1])
+ann_model = hopnet(full_pattern_set.shape[1]) # idk what mnist dimensions are
 model = DummyCNN_ANN(ann_model)
-num_succ, num_fail = evaluate_model_recall(model, full_pattern_set, full_label_set, full_pattern_set, full_label_set, verbose=True)
+num_succ, num_fail = evaluate_model_recall(model, full_stored_set, full_stored_labels, full_pattern_set, full_label_set, verbose=True)
 print(num_succ, ":", num_fail)
 
 
