@@ -94,13 +94,12 @@ class PopularityANN(AttractorNetwork):
                 self.W[i][j] = weight_sum / (self.C * a)
                 self.W[j][i] = self.W[i][j]
 
-    def simulate(self, activation, beta=1, threshold=1, max_epoch=50):
+    def simulate(self, activation, beta=1, threshold=1, max_epoch=20):
         self.A = np.copy(activation).astype(np.float64)
         Aold = np.copy(activation).astype(np.float64)
         converged = False
         epochs = 0
         while not converged:
-            print(self.A)
             epochs += 1
             # generate random ordering of nodes
             indices = np.random.permutation(self.N) 
@@ -116,7 +115,6 @@ class PopularityANN(AttractorNetwork):
             if all(self.A == Aold) or epochs > max_epoch:
                 converged = True
             Aold = np.copy(self.A)
-        print("Converged to", self.A)
         return (self.A, self.label_map[self.A.astype(int).tobytes()])
     
     def sigmoidal(self, hi, beta, threshold):

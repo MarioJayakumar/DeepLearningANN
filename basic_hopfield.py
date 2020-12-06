@@ -52,7 +52,7 @@ class hopnet(AttractorNetwork):
             c_data = self.threshold(
                 data[i], theta=0.5)     # for each input pattern i
             self.W = self.W + np.outer(c_data, c_data)
-            self.label_map[c_data.tobytes()] = labels[i]
+            self.label_map[c_data.astype(int).tobytes()] = labels[i]
         self.W = (1.0 / N) * (self.W - M * np.eye(N, N))  # zeros main diag.
 
     def sgn(self, input, oldval):         # compute a = sgn(input)
@@ -78,7 +78,7 @@ class hopnet(AttractorNetwork):
         return
 
     def simulate(self, Ainit):
-        Ainit = self.threshold(Ainit)
+        Ainit = self.threshold(Ainit, theta=0.5)
         # Simulate Hopfield net starting in state Ainit.
         # Returns iteration number tlast and Hamming distance dist
         # of A from stored pattern Ainit when final state reached.
@@ -108,7 +108,7 @@ class hopnet(AttractorNetwork):
             #fileid.write("Aold after updating = {} \n".format(Aold))
         #fileid.write("after while termination: self.A = {}, Aold = {} \n".format(self.A,Aold))
         # self.showstate(fileid,t,self.E)
-        predict_label = self.label_map[self.A.tobytes()]
+        predict_label = self.label_map[self.A.astype(int).tobytes()]
         return (self.A, predict_label)
 
     def energy(self):             # Returns network's energy E

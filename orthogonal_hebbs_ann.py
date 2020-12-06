@@ -70,32 +70,47 @@ class OrthogonalHebbsANN(AttractorNetwork):
     def kronecker_delta(self, left, right):
         return int(left == right)
 
+    # utility function to normalize vect
+    def normalize_vector(self, vect):
+        mag_vect = np.linalg.norm(vect)
+        if mag_vect != 0:
+            return vect / mag_vect
+        return vect
+
     # data should be M examples, where the ith example is vector of length N
     # so Data is MxN
     def learn(self, data, labels):          
         N = self.N
         M = data.shape[0]
+        threshold_data = []
         for i in range(M):
-            self.label_map[data[i].tobytes()] = labels[i]
+            threshold_data.append(self.threshold(data[i], theta=0.5))
+            self.label_map[threshold_data[i].astype(int).tobytes()] = labels[i]
+        threshold_data = np.array(threshold_data)
         # would like to turn into matrix math, but will use for loop for now
-        orthogonalized_data = self.orthogonalize_data(data)
+        orthogonalized_data = self.orthogonalize_data(threshold_data)
         for i in range(N-1):
             for j in range(i, N):
                 w_sum = 0.0
                 for k in range(M):
-                    n_norm_i = orthogonalized_data[k][i]/np.linalg.norm(orthogonalized_data[k][i])
-                    n_norm_j = orthogonalized_data[k][j]/np.linalg.norm(orthogonalized_data[k][j])
-                    w_sum += n_norm_i*n_norm_j - self.kronecker_delta(i, j)*n_norm_i*n_norm_i
+                    mu_norm = self.normalize_vector(np.copy(orthogonalized_data[k]))
+                    w_sum += mu_norm[i]*mu_norm[j] - self.kronecker_delta(i, j)*mu_norm[i]*mu_norm[i]
                 self.W[i][j] = w_sum
                 self.W[j][i] = w_sum
         
     def sgn(self, input, oldval):         # compute a = sgn(input)
         if input > 0:
             return 1
-        elif input < 0:
-            return -1
         else:
-            return oldval
+            return -1
+
+    def threshold(self, input_array, theta=0):
+        for index in range(len(input_array)):
+            if input_array[index] >= theta:
+                input_array[index] = 1.0
+            else:
+                input_array[index] = -1.0
+        return input_array
 
     def update(self):                       # asynchronously update A
         indices = np.random.permutation(self.N)  # determine order node updates
@@ -105,7 +120,7 @@ class OrthogonalHebbsANN(AttractorNetwork):
         return
 
     def simulate(self, Ainit):
-        Ainit = self.discretize_activation(Ainit)
+        Ainit = self.threshold(Ainit, theta=0.5)
         # Simulate Hopfield net starting in state Ainit.
         # Returns iteration number tlast and Hamming distance dist
         # of A from stored pattern Ainit when final state reached.
