@@ -45,21 +45,21 @@ class hopnet(AttractorNetwork):
 
     # data should be M examples, where the ith example is vector of length N
     # so Data is MxN
+    # ASSUMES INPUT FIELDS ARE IN RANGE [0,1]. IF NOT THE CASE THEN STANDARDIZE
     def learn(self, data, labels):          # learn matrix W from data
         N = self.N
         M = data.shape[0]
         for i in range(M):
             c_data = self.threshold(
-                data[i])     # for each input pattern i
+                data[i], theta=0.5)     # for each input pattern i
             self.W = self.W + np.outer(c_data, c_data)
             self.label_map[c_data.astype(int).tobytes()] = labels[i]
         self.W = (1.0 / N) * (self.W - M * np.eye(N, N))  # zeros main diag.
 
-    def sgn(self, input, oldval):         # compute a = sgn(input)
-        if input > 0:
-            return 1
-        else:
-            return -1
+    def sgn(self,input,oldval):         # compute a = sgn(input)
+        if input > 0: return 1
+        elif input < 0: return -1
+        else: return oldval
 
     # input must be a numpy array
     def threshold(self, input_array, theta=0):
@@ -78,7 +78,7 @@ class hopnet(AttractorNetwork):
         return
 
     def simulate(self, Ainit):
-        Ainit = self.threshold(Ainit)
+        Ainit = self.threshold(Ainit, theta=0.5)
         # Simulate Hopfield net starting in state Ainit.
         # Returns iteration number tlast and Hamming distance dist
         # of A from stored pattern Ainit when final state reached.

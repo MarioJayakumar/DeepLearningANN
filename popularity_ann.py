@@ -123,6 +123,6 @@ class PopularityANN(AttractorNetwork):
         if sigmoid >= 0.5:
             return 1
         else:
-            return 0 
+            return -1 
 
 

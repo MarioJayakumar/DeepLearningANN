@@ -79,6 +79,7 @@ class OrthogonalHebbsANN(AttractorNetwork):
 
     # data should be M examples, where the ith example is vector of length N
     # so Data is MxN
+    # ASSUMES INPUT FIELDS ARE IN RANGE [0,1]. IF NOT THE CASE THEN STANDARDIZE
     def learn(self, data, labels):          
         N = self.N
         M = data.shape[0]
