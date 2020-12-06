@@ -50,7 +50,7 @@ class hopnet(AttractorNetwork):
         M = data.shape[0]
         for i in range(M):
             c_data = self.threshold(
-                data[i], theta=0.5)     # for each input pattern i
+                data[i])     # for each input pattern i
             self.W = self.W + np.outer(c_data, c_data)
             self.label_map[c_data.astype(int).tobytes()] = labels[i]
         self.W = (1.0 / N) * (self.W - M * np.eye(N, N))  # zeros main diag.
@@ -59,7 +59,7 @@ class hopnet(AttractorNetwork):
         if input > 0:
             return 1
         else:
-            return 0
+            return -1
 
     # input must be a numpy array
     def threshold(self, input_array, theta=0):
@@ -67,7 +67,7 @@ class hopnet(AttractorNetwork):
             if input_array[index] >= theta:
                 input_array[index] = 1
             else:
-                input_array[index] = 0
+                input_array[index] = -1
         return input_array
                 
     def update(self):                       # asynchronously update A
@@ -78,7 +78,7 @@ class hopnet(AttractorNetwork):
         return
 
     def simulate(self, Ainit):
-        Ainit = self.threshold(Ainit, theta=0.5)
+        Ainit = self.threshold(Ainit)
         # Simulate Hopfield net starting in state Ainit.
         # Returns iteration number tlast and Hamming distance dist
         # of A from stored pattern Ainit when final state reached.
