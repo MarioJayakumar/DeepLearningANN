@@ -4,7 +4,6 @@ import torchvision.transforms as transforms
 import torch.nn as nn
 import torch.optim as optim
  
-import cv2
 # Define whether to use GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
  
