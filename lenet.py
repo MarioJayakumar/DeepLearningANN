@@ -5,7 +5,7 @@ import torch.nn as nn
 from collections import OrderedDict
 
 
-class C1(nn.Module):
+class C1(nn.Module): # layers C1-S1
     def __init__(self):
         super(C1, self).__init__()
 
@@ -20,7 +20,7 @@ class C1(nn.Module):
         return output
 
 
-class C2(nn.Module):
+class C2(nn.Module): # this is the C2-S2 layers of Lenet5
     def __init__(self):
         super(C2, self).__init__()
 
@@ -35,7 +35,7 @@ class C2(nn.Module):
         return output
 
 
-class C3(nn.Module):
+class C3(nn.Module): # this is the C5 layer
     def __init__(self):
         super(C3, self).__init__()
 
@@ -49,7 +49,7 @@ class C3(nn.Module):
         return output
 
 
-class F4(nn.Module):
+class F4(nn.Module): # this is the C5 layer of Lenet5
     def __init__(self):
         super(F4, self).__init__()
 

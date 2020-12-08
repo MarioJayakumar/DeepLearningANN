@@ -93,6 +93,16 @@ class PopularityANN(AttractorNetwork):
                     weight_sum += (data[k][i]) * (data[k][j] - a_arr[j])
                 self.W[i][j] = weight_sum / (self.C * a)
                 self.W[j][i] = self.W[i][j]
+        for i in range(self.N-1):
+            for j in range(i+1, self.N):
+                if self.connections[i][j] == 0:
+                    self.W[i][j] = 0
+                    self.W[j][i] = 0
+    def sgn(self, input, oldval):         # compute a = sgn(input)
+        if input > 0:
+            return 1
+        else:
+            return -1
 
     def simulate(self, activation, beta=1, threshold=1, max_epoch=20):
         self.A = np.copy(activation).astype(np.float64)
@@ -104,14 +114,9 @@ class PopularityANN(AttractorNetwork):
             # generate random ordering of nodes
             indices = np.random.permutation(self.N) 
             presynapse = np.copy(self.A) 
-            for i in indices:                     
-                hi = 0
-                for j in range(self.N):
-                    hi += self.connections[i][j]*self.W[i][j]*presynapse[j]
-                if hi > 0:
-                    self.A[i] = 1
-                elif hi < 0:
-                    self.A[i] = -1
+            for i in indices:                     # for each node i
+                scalprod = np.dot(self.W[i, :], presynapse)         # compute i's input
+                self.A[i] = self.sgn(scalprod, presynapse)   # assign i's act. value
             if all(self.A == Aold) or epochs > max_epoch:
                 converged = True
             Aold = np.copy(self.A)
